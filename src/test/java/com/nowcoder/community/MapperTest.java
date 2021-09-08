@@ -2,6 +2,7 @@ package com.nowcoder.community;
 
 import com.nowcoder.community.dao.DiscussPostMapper;
 import com.nowcoder.community.dao.UserMapper;
+import com.nowcoder.community.entity.DiscussPost;
 import com.nowcoder.community.entity.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +33,19 @@ public class MapperTest {
 
         user = userMapper.selectByEmail("nowcoder101@sina.com");
         System.out.println(user);
+    }
+
+    @Test
+    public void testDis() {
+        DiscussPost post = new DiscussPost();
+        post.setUserId(34343);
+        post.setCommentCount(1);
+        post.setContent("fdjfdf");
+        post.setStatus(3);
+        post.setTitle("fdf");
+        post.setType(2);
+
+        discussPostMapper.insertDiscussPost(post);
     }
 
 
