@@ -3,12 +3,6 @@ package com.nowcoder.community.mapper;
 import com.nowcoder.community.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 
-/**
- * @Author: pyhita
- * @Date: 2022/2/23
- * @Descrption: com.yangtao.mapper
- * @Version: 1.0
- */
 @Mapper
 public interface UserMapper {
 
