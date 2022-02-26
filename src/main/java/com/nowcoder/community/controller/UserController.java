@@ -50,6 +50,7 @@ public class UserController {
         return "/site/setting";
     }
 
+    // 上传头像
     @LoginRequired
     @RequestMapping(path = "/upload", method = RequestMethod.POST)
     public String uploadHeader(MultipartFile headerImage, Model model) {
