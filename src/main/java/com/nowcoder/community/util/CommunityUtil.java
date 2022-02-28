@@ -43,8 +43,33 @@ public class CommunityUtil {
 
     public static String getJSONString(int code) {
         return getJSONString(code, null, null);
+
     }
 
+    // 规定返回的结果格式
+    public static String getJsonString(String msg, int code, Map<String, Object> map) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("msg", msg);
+        jsonObject.put("code", code);
+
+        if (map != null) {
+            for (String key : map.keySet()) {
+                jsonObject.put(key, map.get(key));
+            }
+        }
+
+        return jsonObject.toJSONString();
+    }
+
+    public static String getJsonString(String msg, int code) {
+
+        return getJsonString(msg, code, null);
+    }
+
+    public static String getJsonString(int code) {
+
+        return getJsonString(null, code, null);
+    }
     public static void main(String[] args) {
         Map<String, Object> map = new HashMap<>();
         map.put("name", "zhangsan");
