@@ -4,6 +4,7 @@ import com.google.code.kaptcha.Producer;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.service.UserService;
 import com.nowcoder.community.util.CommunityConstant;
+import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.RedisKeyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 public class LoginController implements CommunityConstant {
@@ -93,8 +95,19 @@ public class LoginController implements CommunityConstant {
         String text = kaptchaProducer.createText();
         BufferedImage image = kaptchaProducer.createImage(text);
 
-        // 将验证码存入session
-        session.setAttribute("kaptcha", text);
+        // v1.将验证码存入session,效率较低
+//        session.setAttribute("kaptcha", text);
+
+        // v2.将验证码存入redis，过期时间60s
+        //验证码的所属
+        String kaptchaOwner = CommunityUtil.generateUUID();
+        Cookie cookie = new Cookie("kaptchaOwner", kaptchaOwner);
+        cookie.setMaxAge(60);
+        cookie.setPath(contextPath);
+        response.addCookie(cookie);
+        //将验证码存入redis
+        String kaptchaKey = RedisKeyUtil.getKaptchaKey(kaptchaOwner);
+        redisTemplate.opsForValue().set(kaptchaKey, text, 60, TimeUnit.SECONDS);
 
         // 将突图片输出给浏览器
         response.setContentType("image/png");

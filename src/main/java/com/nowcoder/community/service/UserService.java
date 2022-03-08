@@ -5,10 +5,7 @@ import com.nowcoder.community.entity.LoginTicket;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.mapper.LoginTicketMapper;
 import com.nowcoder.community.mapper.UserMapper;
-import com.nowcoder.community.util.CommunityConstant;
-import com.nowcoder.community.util.CommunityUtil;
-import com.nowcoder.community.util.MailClient;
-import com.nowcoder.community.util.RedisKeyUtil;
+import com.nowcoder.community.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.nio.file.attribute.UserDefinedFileAttributeView;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,14 +42,19 @@ public class UserService implements CommunityConstant {
     private RedisTemplate redisTemplate;
 
     @Autowired
+    private BloomFilterUtil<Integer> bloomFilterUtil;
+
+    @Autowired
     private LoginTicketMapper loginTicketMapper;
 
     public User findUserById(int id) {
         //        return userMapper.selectById(id);
         User user = getCache(id);
         if (user == null) {
+            if (!bloomFilterUtil.contains(id)) return null;
             user = initCache(id);
         }
+
         return user;
     }
 
@@ -212,9 +213,13 @@ public class UserService implements CommunityConstant {
     //2.缓存取不到，从数据库中查，再存入缓存(初始化缓存)
     public User initCache(int userId) {
         User user = userMapper.selectById(userId);
-        String userKey = RedisKeyUtil.getUserKey(userId);
-        //过期时间1h，3600s
-        redisTemplate.opsForValue().set(userKey, user, 3600, TimeUnit.SECONDS);
+        if (user != null) {
+            bloomFilterUtil.put(userId);
+            String userKey = RedisKeyUtil.getUserKey(userId);
+            //过期时间1h，3600s
+            redisTemplate.opsForValue().set(userKey, user, 3600, TimeUnit.SECONDS);
+        }
+
         return user;
     }
 

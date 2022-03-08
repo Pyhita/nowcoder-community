@@ -1,7 +1,6 @@
 package com.nowcoder.community.util;
 
 public interface CommunityConstant {
-
     /**
      * 激活成功
      */
